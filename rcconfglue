@@ -1,0 +1,13 @@
+sshd_enable="YES"
+
+for interface in ${depenguinator_interfaces}; do
+	macaddr=`eval echo "\\$depenguinator_mac_${interface}"`
+	ipaddr=`eval echo "\\$depenguinator_ip_${interface}"`
+	netmask=`eval echo "\\$depenguinator_netmask_${interface}"`
+
+	for real_if in `ifconfig -l`; do
+		if ifconfig ${real_if} | grep -qi ${macaddr}; then
+eval ifconfig_${real_if}=\"inet ${ipaddr} netmask ${netmask}\"
+		fi
+	done
+done

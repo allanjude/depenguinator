@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# PROVIDE: mdinit
+# BEFORE: mountcritlocal
+# KEYWORD: FreeBSD
+
+. /etc/rc.subr
+
+name="mdinit"
+start_cmd="mdinit_start"
+stop_cmd=":"
+
+mdinit_start()
+{
+	for mount in ${mdinit_mounts}; do
+		mdsize=`eval echo \\$mdinit_size_${mount}`
+		/sbin/mdmfs -s ${mdsize} -M md /${mount}
+		/bin/tar -xf ${mount}.tgz -C /
+	done
+}
+
+load_rc_config $name
+run_rc_command "$1"
+

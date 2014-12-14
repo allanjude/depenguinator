@@ -1,0 +1,25 @@
+# Everything which you should need to edit
+# to create a boot image is in this file.
+
+hostname="exbuntu.daemonology.net"
+defaultrouter="10.0.0.1"
+
+# Name server (to be placed into /etc/resolv.conf)
+depenguinator_nameserver="10.0.0.53"
+
+# These correspond to the ifconfig_* entries in
+# /etc/rc.conf.  We can't use the "real" names of
+# interfaces, because they depend upon the order
+# in which devices are detected and initialized.
+
+# depenguiantor_interfaces should be a list of names of interfaces.
+depenguinator_interfaces="external"
+
+# depenguinator_mac_FOO should be the MAC address of interface FOO
+depenguinator_mac_external="01:23:45:67:89:AB"
+
+# depenguinator_ip_FOO should be the IP address of interface FOO
+depenguinator_ip_external="10.0.0.2"
+
+# depenguinator_netmask_FOO should be the netmask of interface FOO
+depenguinator_netmask_external="255.0.0.0"
