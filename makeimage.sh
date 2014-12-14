@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if ! [ $# = 3 ]; then
-  echo "usage: $0 disc1.iso 7.0-RELEASE ~/.ssh/authorized_keys"
+  echo "usage: $0 disc1.iso 10.1-RELEASE ~/.ssh/authorized_keys"
   exit 1
 fi
 
