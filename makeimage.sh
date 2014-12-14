@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if ! [ $# = 3 ]; then
-  echo "usage: $0 disc1.iso 10.1-RELEASE ~/.ssh/authorized_keys"
+  echo "usage: $0 10.1-RELEASE ~/.ssh/authorized_keys"
   exit 1
 fi
 
@@ -10,64 +10,34 @@ if ! [ `id -g` = "0" ]; then
   exit 1
 fi
 
-# Mount the release ISO image
+#Download the dist set
 mkdir dist
 rm -f dist.mounted
-case "`uname -s`" in
-  FreeBSD)
-    case "`uname -r`" in
-      4*) vnconfig vn0c $1
-          mount -t cd9660 /dev/vn0c dist
-          touch dist.mounted;;
-      5*) mdconfig -a -t vnode -f $1
-          mount -t cd9660 /dev/md0 dist
-          touch dist.mounted;;
-      6*) mdconfig -a -t vnode -f $1
-          mount -t cd9660 /dev/md0 dist
-          touch dist.mounted;;
-    esac;;
-  Linux)
-    mount -t iso9660 -o loop $1 dist
-    touch dist.mounted;;
-esac
-if ! [ -e dist.mounted ]; then
-  echo "Cannot unmount $1 from dist automatically."
-  echo "Do it yourself."
-  sh -i
-  touch dist.mounted
+
+which fetch 2>&1 > /dev/null
+if [ $? -eq 1 ]; then
+	which wget 2>&1 > /dev/null
+	if [ $? -eq 1 ]; then
+		which curl 2>&1 > /dev/null
+		if [ $? -eq 1 ]; then
+			echo "Please install wget or curl to download FreeBSD"
+			exit 3
+		fi
+		curl -o dist/base.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/base.txz
+		curl -o dist/kernel.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/kernel.txz
+	else
+		wget -O dist/base.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/base.txz
+		wget -O dist/kernel.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/kernel.txz
+	fi
+else
+	fetch -o dist/base.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/base.txz
+	fetch -o dist/kernel.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/kernel.txz
 fi
 
 # Extract bits from the release
 mkdir mfs && chown 0:0 mfs
-cat dist/$2/base/base.?? | bsdtar --unlink -xpzf - -C mfs
-cat dist/$2/kernels/generic.?? | bsdtar --unlink -xpzf - -C mfs/boot
-rmdir mfs/boot/kernel && mv mfs/boot/GENERIC mfs/boot/kernel
-
-# Unmount the release ISO image
-case "`uname -s`" in
-  FreeBSD)
-    case "`uname -r`" in
-      4*) umount dist
-          vnconfig -u vn0c
-          rm dist.mounted;;
-      5*) umount dist
-          mdconfig -d -u 0
-          rm dist.mounted;;
-      6*) umount dist
-          mdconfig -d -u 0
-          rm dist.mounted;;
-    esac;;
-  Linux)
-    umount dist
-    rm dist.mounted;;
-esac
-if [ -e dist.mounted ]; then
-  echo "Cannot unmount $1 from dist automatically."
-  echo "Do it yourself."
-  sh -i
-  rm dist.mounted
-fi
-rmdir dist
+tar --unlink -xpJf dist/base.txz -C mfs
+tar --unlink -xpJf dist/kernel.txz -C mfs/boot
 
 # Clean up files we don't need in the image
 rm -rf mfs/rescue
