@@ -82,7 +82,7 @@ for interface in ${depenguinator_interfaces}; do
 done
 
 # Package up /usr into usr.tgz
-( cd mfs && bsdtar -czf usr.tgz usr)
+( cd mfs && tar -czf usr.tgz usr)
 chattr -R -i mfs/usr && rm -r mfs/usr && mkdir mfs/usr
 
 # Build makefs
