@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if ! [ $# = 3 ]; then
+if ! [ $# = 2 ]; then
   echo "usage: $0 10.1-RELEASE ~/.ssh/authorized_keys"
   exit 1
 fi
@@ -64,7 +64,7 @@ echo "/dev/md0 / ufs rw 0 0" > mfs/etc/fstab
 
 # Set up bits so that we can SSH in as root.
 mkdir mfs/root/.ssh
-cp $3 mfs/root/.ssh/authorized_keys
+cp $2 mfs/root/.ssh/authorized_keys
 echo PermitRootLogin yes >> mfs/etc/ssh/sshd_config
 
 # Load configuration data
