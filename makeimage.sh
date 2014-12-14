@@ -39,16 +39,7 @@ mkdir mfs && chown 0:0 mfs
 tar --unlink -xpJf dist/base.txz -C mfs
 tar --unlink -xpJf dist/kernel.txz -C mfs/boot
 
-# Clean up files we don't need in the image
-rm -rf mfs/rescue
-rm -rf mfs/usr/include
-for x in c++ g++ CC gcc cc yacc byacc			\
-	addr2line ar as gasp gdb gdbreplay ld nm	\
-	objcopy objdump	ranlib readelf size strip; do	\
-	rm -f mfs/usr/bin/$x;				\
-done
-rm -f mfs/usr/lib/*.a
-rm -f mfs/usr/libexec/cc1*
+#Remove debugging symbols to save space
 rm -f mfs/boot/kernel/*.symbols
 
 # Move tar and bits it needs into /
