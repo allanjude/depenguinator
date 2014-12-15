@@ -11,8 +11,7 @@ if ! [ `id -g` = "0" ]; then
 fi
 
 #Download the dist set
-mkdir dist
-rm -f dist.mounted
+mkdir -p dist
 
 which fetch 2>&1 > /dev/null
 if [ $? -eq 1 ]; then
@@ -26,8 +25,8 @@ if [ $? -eq 1 ]; then
 		curl -o dist/base.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/base.txz
 		curl -o dist/kernel.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/kernel.txz
 	else
-		wget -O dist/base.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/base.txz
-		wget -O dist/kernel.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/kernel.txz
+		wget -c -O dist/base.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/base.txz
+		wget -c -O dist/kernel.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/kernel.txz
 	fi
 else
 	fetch -o dist/base.txz ftp://ftp.freebsd.org/pub/FreeBSD/releases/amd64/$1/base.txz
@@ -37,7 +36,7 @@ fi
 # Extract bits from the release
 mkdir mfs && chown 0:0 mfs
 tar --unlink -xpJf dist/base.txz -C mfs
-tar --unlink -xpJf dist/kernel.txz -C mfs/boot
+tar --unlink -xpJf dist/kernel.txz -C mfs
 
 #Remove debugging symbols to save space
 rm -f mfs/boot/kernel/*.symbols
@@ -64,6 +63,7 @@ echo "/dev/md0 / ufs rw 0 0" > mfs/etc/fstab
 
 # Set up bits so that we can SSH in as root.
 mkdir mfs/root/.ssh
+chmod 700 mfs/root/.ssh
 cp $2 mfs/root/.ssh/authorized_keys
 echo PermitRootLogin yes >> mfs/etc/ssh/sshd_config
 
@@ -83,7 +83,7 @@ done
 
 # Package up /usr into usr.tgz
 ( cd mfs && tar -czf usr.tgz usr)
-chattr -R -i mfs/usr && rm -r mfs/usr && mkdir mfs/usr
+rm -r mfs/usr && mkdir mfs/usr
 
 # Build makefs
 tar -xzf makefs-20080113.tar.gz
@@ -104,6 +104,6 @@ ${MAKEFS} disk.img disk
 dd if=bootcode of=disk.img conv=notrunc
 
 # Clean up
-chattr -R -i mfs && rm -rf mfs
+rm -r mfs
 rm -r disk
-rm -rf makefs-20080113
+rm -r makefs-20080113
